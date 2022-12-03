@@ -13,11 +13,8 @@ Options -Indexes
 <Files ~ "^.(htaccess|htpasswd)$">
 deny from all
 </Files>
-ErrorDocument 404 https://neo.monster/404.html
+ErrorDocument 404 https://0x733.github.io/404.html
 order deny,allow
 <Files ~ "^.(htaccess|htpasswd)$">
 deny from all
 </Files>
-Redirect temp neo.monster/github neo.monster/github.html
-Redirect temp neo.monster/gitlab neo.monster/gitlab.html
-order deny,allow
