@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>UBlock Test</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXX-Y"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        .reklam {width: 300px; height: 250px; background: #eee; margin: 20px;}
+        .popup {position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                background: white; padding: 20px; display: none; z-index: 999;}
+        .takip {position: fixed; bottom: 20px; right: 20px;}
+        #analytics {display: none;}
+        .sosyal {margin: 20px;}
+        #adblockuyari {display: none; background: red; color: white; padding: 20px; text-align: center;}
+        body * {user-select: none;}
+    </style>
+</head>
+<body>
+
+<div id="adblockuyari">
+    Reklam engelleyicinizi kapatın!
+</div>
+
+<div class="reklam" id="reklam1">
+    <ins class="adsbygoogle"></ins>
+</div>
+
+<div class="reklam" id="reklam2">
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+</div>
+
+<div class="popup" id="popup1">
+    <h3>Bültenimize Abone Olun!</h3>
+    <input type="email" placeholder="E-posta">
+    <button onclick="this.parentElement.style.display='none'">Kapat</button>
+</div>
+
+<div class="takip">
+    <button onclick="izle()">Konum İzni Ver</button>
+</div>
+
+<div class="sosyal">
+    <iframe src="https://www.facebook.com/plugins/like.php" width="100" height="20"></iframe>
+    <iframe src="https://platform.twitter.com/widgets/follow_button.html" width="100" height="20"></iframe>
+</div>
+
+<script>
+function izle() {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+        console.log(pos.coords);
+    });
+}
+
+setTimeout(function() {
+    document.getElementById('popup1').style.display = 'block';
+}, 3000);
+
+let izleyici = new Image();
+izleyici.src = 'takip.gif';
+
+document.cookie = "kullanici=test123; expires=Thu, 18 Dec 2025 12:00:00 UTC";
+localStorage.setItem('ziyaretci', 'evet');
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-XXXXX-Y');
+
+function adBlockKontrol() {
+    let test = document.createElement('div');
+    test.innerHTML = '&nbsp;';
+    test.className = 'adsbox';
+    document.body.appendChild(test);
+    let blocked = test.offsetHeight === 0;
+    document.body.removeChild(test);
+    return blocked;
+}
+
+setInterval(function() {
+    if(adBlockKontrol()) {
+        document.getElementById('adblockuyari').style.display = 'block';
+    }
+}, 1000);
+
+let devtoolsAcik = false;
+
+setInterval(function() {
+    const threshold = 160;
+    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+    if(widthThreshold || heightThreshold) {
+        devtoolsAcik = true;
+        window.location.href = "about:blank";
+    }
+}, 1000);
+
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.keyCode == 73) e.preventDefault();
+    if (e.ctrlKey && e.shiftKey && e.keyCode == 74) e.preventDefault();
+    if (e.keyCode == 123) e.preventDefault();
+    if (e.ctrlKey && e.keyCode == 85) e.preventDefault();
+});
+
+(function() {
+    debugger;
+})();
+
+console.log = function() {};
+console.warn = function() {};
+console.error = function() {};
+
+eval(function(p,a,c,k,e,d){e=function(c){return c.toString(36)};if(!''.replace(/^/,String)){while(c--){d[c.toString(a)]=k[c]||c.toString(a)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('(0(){4 1="2";3.5(1)})();',6,6,'function|test|test|console|var|log'.split('|'),0,{}));
+
+</script>
+
+</body>
+</html>
