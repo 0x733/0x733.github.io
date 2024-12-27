@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>UBlock Test</title>
+    <script type="module" src="cookie.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXX-Y"></script>
     <script async src="https://static.doubleclick.net/instream/ad_status.js"></script>
@@ -23,141 +24,175 @@
     </style>
 </head>
 <body>
-
 <div id="adblockuyari">Reklam engelleyicinizi kapatın!</div>
-
 <div class="reklam" id="reklam1">
     <ins class="adsbygoogle"></ins>
 </div>
-
 <div class="reklam" id="reklam2">
     <amp-ad width="100" height="100" type="adsense"></amp-ad>
 </div>
-
 <div id="gizliReklam">
     <iframe src="about:blank" name="ad-frame" class="ad-frame"></iframe>
     <div class="ad-unit"></div>
     <div class="advertisement"></div>
 </div>
-
 <div class="popup" id="popup1">
     <h3>Bültenimize Abone Olun!</h3>
     <input type="email" placeholder="E-posta">
     <button onclick="this.parentElement.style.display='none'">Kapat</button>
 </div>
-
 <div class="takip">
-    <button onclick="izle()">Konum İzni Ver</button>
+    <button id="konumBtn">Konum İzni Ver</button>
 </div>
-
 <div class="sosyal">
     <iframe src="https://www.facebook.com/plugins/like.php" width="100" height="20"></iframe>
     <iframe src="https://platform.twitter.com/widgets/follow_button.html" width="100" height="20"></iframe>
     <iframe src="https://www.linkedin.com/embed/feed/update/" width="100" height="20"></iframe>
 </div>
 
-<script>
-(function() {
-    const _0x4f5e=['log','warn','error','info','debug','trace'];
-    for(let i=0;i<_0x4f5e.length;i++){console[_0x4f5e[i]]=function(){};}
-})();
+<script type="module">
+import CerezYonetici from './cookie.js';
 
-let adEngellendi = false;
-let devtoolsAcik = false;
+const Guvenlik = {
+    konsoluKapat() {
+        const metodlar = ['log', 'warn', 'error', 'info', 'debug', 'trace'];
+        metodlar.forEach(metod => console[metod] = () => {});
+    },
 
-function izle() {
-    navigator.geolocation.getCurrentPosition(function(pos) {});
-}
+    devAraclariKontrol() {
+        const element = new Image();
+        Object.defineProperty(element, 'id', {
+            get: () => {
+                this.devAraclarAcik = true;
+                return '';
+            }
+        });
+        console.log('%c', element);
+    },
 
-function rastgeleReklam() {
-    const reklamTipleri = ['adsense', 'doubleclick', 'analytics'];
-    const rastgele = Math.floor(Math.random() * reklamTipleri.length);
-    const element = document.createElement('script');
-    element.src = `https://${reklamTipleri[rastgele]}.com/ads.js`;
-    document.head.appendChild(element);
-}
+    klavyeKontrol(e) {
+        const yasakliTuslar = [
+            e.ctrlKey && e.shiftKey && e.keyCode === 73,  // Ctrl+Shift+I
+            e.ctrlKey && e.shiftKey && e.keyCode === 74,  // Ctrl+Shift+J
+            e.keyCode === 123,                            // F12
+            e.ctrlKey && e.keyCode === 85,               // Ctrl+U
+            e.ctrlKey && e.keyCode === 83,               // Ctrl+S
+            e.ctrlKey && e.keyCode === 80                 // Ctrl+P
+        ];
+        if(yasakliTuslar.some(kontrol => kontrol)) {
+            e.preventDefault();
+            return false;
+        }
+    },
 
-function adBlockKontrol() {
-    const kontroller = [
-        !!window.google_ad_status,
-        !!window.google_ad_block,
-        document.getElementById('gizliReklam').offsetHeight === 0,
-        window.canRunAds === undefined,
-        document.createElement('div').setAttribute('class', 'adsbygoogle')
-    ];
-    return kontroller.some(check => check);
-}
+    boyutKontrol() {
+        const threshold = 160;
+        if(this.devAraclarAcik || 
+           window.outerWidth - window.innerWidth > threshold || 
+           window.outerHeight - window.innerHeight > threshold) {
+            window.location.href = "about:blank";
+        }
+    },
 
-function devToolsKontrol() {
-    const element = new Image();
-    element.__defineGetter__('id', function() {
-        devtoolsAcik = true;
+    init() {
+        this.devAraclarAcik = false;
+        this.konsoluKapat();
+        setInterval(() => this.devAraclariKontrol(), 100);
+        setInterval(() => this.boyutKontrol(), 100);
+        document.addEventListener('keydown', this.klavyeKontrol);
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        window.addEventListener('resize', () => {
+            if(window.innerWidth < 50 || window.innerHeight < 50) {
+                window.location.reload();
+            }
+        });
+    }
+};
+
+const ReklamKontrol = {
+    engellendi: false,
+
+    kontrol() {
+        const kontroller = [
+            !!window.google_ad_status,
+            !!window.google_ad_block,
+            document.getElementById('gizliReklam').offsetHeight === 0,
+            window.canRunAds === undefined,
+            document.createElement('div').setAttribute('class', 'adsbygoogle')
+        ];
+        return kontroller.some(check => check);
+    },
+
+    rastgeleReklamYukle() {
+        const reklamTipleri = ['adsense', 'doubleclick', 'analytics'];
+        const rastgele = Math.floor(Math.random() * reklamTipleri.length);
+        const element = document.createElement('script');
+        element.src = `https://${reklamTipleri[rastgele]}.com/ads.js`;
+        document.head.appendChild(element);
+    },
+
+    init() {
+        setInterval(() => {
+            if(this.kontrol()) {
+                this.engellendi = true;
+                document.getElementById('adblockuyari').style.display = 'block';
+                this.rastgeleReklamYukle();
+            }
+        }, 500);
+    }
+};
+
+const Analitik = {
+    init() {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-XXXXX-Y');
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Güvenlik başlat
+    Guvenlik.init();
+    
+    // Reklam kontrolü başlat
+    ReklamKontrol.init();
+    
+    // Analitik başlat
+    Analitik.init();
+    
+    // Çerez yönetimi başlat
+    CerezYonetici.oturumBaslat();
+    
+    // Popup kontrolü
+    setTimeout(() => {
+        document.getElementById('popup1').style.display = 'block';
+        
+        // Ziyaretçi bilgilerini güvenli şekilde sakla
+        CerezYonetici.depo.kaydet('ziyaret_detay', {
+            tarih: new Date().toISOString(),
+            tarayici: btoa(navigator.userAgent),
+            ekran: `${window.innerWidth}x${window.innerHeight}`,
+            dil: navigator.language
+        });
+    }, 3000);
+    
+    // Konum izleme
+    document.getElementById('konumBtn').addEventListener('click', () => {
+        navigator.geolocation.getCurrentPosition(konum => {
+            CerezYonetici.depo.kaydet('konum_izin', {
+                tarih: new Date().toISOString(),
+                durum: 'izinVerildi'
+            });
+        });
     });
-    console.log('%c', element);
-}
-
-const engelleyiciKontrol = setInterval(() => {
-    if(adBlockKontrol()) {
-        adEngellendi = true;
-        document.getElementById('adblockuyari').style.display = 'block';
-        rastgeleReklam();
-    }
-}, 500);
-
-const devtoolsKontrol = setInterval(() => {
-    devToolsKontrol();
-    const threshold = 160;
-    if(devtoolsAcik || 
-       window.outerWidth - window.innerWidth > threshold || 
-       window.outerHeight - window.innerHeight > threshold) {
-        window.location.href = "about:blank";
-    }
-}, 100);
-
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => document.getElementById('popup1').style.display = 'block', 3000);
-    new Image().src = 'takip.gif';
-    document.cookie = "kullanici=test123; expires=Thu, 18 Dec 2025 12:00:00 UTC";
-    localStorage.setItem('ziyaretci', 'evet');
-    sessionStorage.setItem('oturum', 'aktif');
 });
 
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'UA-XXXXX-Y');
-
-const klavyeKontrol = (e) => {
-    const yasakliTuslar = [
-        e.ctrlKey && e.shiftKey && e.keyCode == 73,
-        e.ctrlKey && e.shiftKey && e.keyCode == 74,
-        e.keyCode == 123,
-        e.ctrlKey && e.keyCode == 85,
-        e.ctrlKey && e.keyCode == 83,
-        e.ctrlKey && e.keyCode == 80
-    ];
-    if(yasakliTuslar.some(kontrol => kontrol)) {
-        e.preventDefault();
-        return false;
-    }
-}
-
-document.addEventListener('keydown', klavyeKontrol);
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('devtoolschange', e => window.location.reload());
-
-window.addEventListener('resize', () => {
-    if(window.innerWidth < 50 || window.innerHeight < 50) window.location.reload();
-});
-
+// Anti-debug
 (function() {
     debugger;
     setInterval(() => {debugger;}, 100);
 })();
-
-eval(function(p,a,c,k,e,d){e=function(c){return c.toString(36)};if(!''.replace(/^/,String)){while(c--){d[c.toString(a)]=k[c]||c.toString(a)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('(0(){4 1="2";3.5(1)})();',6,6,'function|test|test|console|var|log'.split('|'),0,{}));
-
 </script>
-
 </body>
 </html>
