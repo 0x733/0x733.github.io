@@ -2,8 +2,8 @@
 <html lang="tr" oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
 <head>
     <meta charset="UTF-8">
-    <title>UBlock Test</title>
-    <script type="module" src="cookie.js"></script>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Güvenlik</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-XXXXX-Y"></script>
     <script async src="https://static.doubleclick.net/instream/ad_status.js"></script>
@@ -12,187 +12,39 @@
     <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
     <meta name="referrer" content="always">
     <style>
-        .reklam {width: 300px; height: 250px; background: #eee; margin: 20px;}
-        .popup {position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                background: white; padding: 20px; display: none; z-index: 999;}
-        .takip {position: fixed; bottom: 20px; right: 20px;}
-        #analytics, .ads, .adsbygoogle, .ad-unit {display: none;}
-        .sosyal {margin: 20px;}
-        #adblockuyari {display: none; background: red; color: white; padding: 20px; text-align: center;}
-        body * {user-select: none !important;}
-        #gizliReklam {position: absolute; opacity: 0; pointer-events: none;}
+        *{margin:0;padding:0;box-sizing:border-box;user-select:none!important}
+        body{font-family:Arial,sans-serif;line-height:1.6}
+        .reklam{width:300px;height:250px;background:#eee;margin:20px;border-radius:8px}
+        .popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:20px;display:none;z-index:999;box-shadow:0 0 10px rgba(0,0,0,.1);border-radius:8px}
+        .takip{position:fixed;bottom:20px;right:20px}
+        #adblockuyari{display:none;background:red;color:#fff;padding:20px;text-align:center;position:fixed;top:0;left:0;right:0;z-index:1000}
+        #gizliReklam{position:absolute;opacity:0;pointer-events:none}
+        .sosyal{margin:20px;display:flex;gap:10px;justify-content:center}
     </style>
 </head>
 <body>
-<div id="adblockuyari">Reklam engelleyicinizi kapatın!</div>
-<div class="reklam" id="reklam1">
-    <ins class="adsbygoogle"></ins>
-</div>
-<div class="reklam" id="reklam2">
-    <amp-ad width="100" height="100" type="adsense"></amp-ad>
-</div>
-<div id="gizliReklam">
-    <iframe src="about:blank" name="ad-frame" class="ad-frame"></iframe>
-    <div class="ad-unit"></div>
-    <div class="advertisement"></div>
-</div>
-<div class="popup" id="popup1">
-    <h3>Bültenimize Abone Olun!</h3>
-    <input type="email" placeholder="E-posta">
-    <button onclick="this.parentElement.style.display='none'">Kapat</button>
-</div>
-<div class="takip">
-    <button id="konumBtn">Konum İzni Ver</button>
-</div>
-<div class="sosyal">
-    <iframe src="https://www.facebook.com/plugins/like.php" width="100" height="20"></iframe>
-    <iframe src="https://platform.twitter.com/widgets/follow_button.html" width="100" height="20"></iframe>
-    <iframe src="https://www.linkedin.com/embed/feed/update/" width="100" height="20"></iframe>
-</div>
-
-<script type="module">
-import CerezYonetici from './cookie.js';
-
-const Guvenlik = {
-    konsoluKapat() {
-        const metodlar = ['log', 'warn', 'error', 'info', 'debug', 'trace'];
-        metodlar.forEach(metod => console[metod] = () => {});
-    },
-
-    devAraclariKontrol() {
-        const element = new Image();
-        Object.defineProperty(element, 'id', {
-            get: () => {
-                this.devAraclarAcik = true;
-                return '';
-            }
-        });
-        console.log('%c', element);
-    },
-
-    klavyeKontrol(e) {
-        const yasakliTuslar = [
-            e.ctrlKey && e.shiftKey && e.keyCode === 73,  // Ctrl+Shift+I
-            e.ctrlKey && e.shiftKey && e.keyCode === 74,  // Ctrl+Shift+J
-            e.keyCode === 123,                            // F12
-            e.ctrlKey && e.keyCode === 85,               // Ctrl+U
-            e.ctrlKey && e.keyCode === 83,               // Ctrl+S
-            e.ctrlKey && e.keyCode === 80                 // Ctrl+P
-        ];
-        if(yasakliTuslar.some(kontrol => kontrol)) {
-            e.preventDefault();
-            return false;
-        }
-    },
-
-    boyutKontrol() {
-        const threshold = 160;
-        if(this.devAraclarAcik || 
-           window.outerWidth - window.innerWidth > threshold || 
-           window.outerHeight - window.innerHeight > threshold) {
-            window.location.href = "about:blank";
-        }
-    },
-
-    init() {
-        this.devAraclarAcik = false;
-        this.konsoluKapat();
-        setInterval(() => this.devAraclariKontrol(), 100);
-        setInterval(() => this.boyutKontrol(), 100);
-        document.addEventListener('keydown', this.klavyeKontrol);
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        window.addEventListener('resize', () => {
-            if(window.innerWidth < 50 || window.innerHeight < 50) {
-                window.location.reload();
-            }
-        });
-    }
-};
-
-const ReklamKontrol = {
-    engellendi: false,
-
-    kontrol() {
-        const kontroller = [
-            !!window.google_ad_status,
-            !!window.google_ad_block,
-            document.getElementById('gizliReklam').offsetHeight === 0,
-            window.canRunAds === undefined,
-            document.createElement('div').setAttribute('class', 'adsbygoogle')
-        ];
-        return kontroller.some(check => check);
-    },
-
-    rastgeleReklamYukle() {
-        const reklamTipleri = ['adsense', 'doubleclick', 'analytics'];
-        const rastgele = Math.floor(Math.random() * reklamTipleri.length);
-        const element = document.createElement('script');
-        element.src = `https://${reklamTipleri[rastgele]}.com/ads.js`;
-        document.head.appendChild(element);
-    },
-
-    init() {
-        setInterval(() => {
-            if(this.kontrol()) {
-                this.engellendi = true;
-                document.getElementById('adblockuyari').style.display = 'block';
-                this.rastgeleReklamYukle();
-            }
-        }, 500);
-    }
-};
-
-const Analitik = {
-    init() {
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'UA-XXXXX-Y');
-    }
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Güvenlik başlat
-    Guvenlik.init();
-    
-    // Reklam kontrolü başlat
-    ReklamKontrol.init();
-    
-    // Analitik başlat
-    Analitik.init();
-    
-    // Çerez yönetimi başlat
-    CerezYonetici.oturumBaslat();
-    
-    // Popup kontrolü
-    setTimeout(() => {
-        document.getElementById('popup1').style.display = 'block';
-        
-        // Ziyaretçi bilgilerini güvenli şekilde sakla
-        CerezYonetici.depo.kaydet('ziyaret_detay', {
-            tarih: new Date().toISOString(),
-            tarayici: btoa(navigator.userAgent),
-            ekran: `${window.innerWidth}x${window.innerHeight}`,
-            dil: navigator.language
-        });
-    }, 3000);
-    
-    // Konum izleme
-    document.getElementById('konumBtn').addEventListener('click', () => {
-        navigator.geolocation.getCurrentPosition(konum => {
-            CerezYonetici.depo.kaydet('konum_izin', {
-                tarih: new Date().toISOString(),
-                durum: 'izinVerildi'
-            });
-        });
-    });
-});
-
-// Anti-debug
-(function() {
-    debugger;
-    setInterval(() => {debugger;}, 100);
-})();
+    <div id="adblockuyari">Reklam engelleyicinizi kapatın!</div>
+    <div class="reklam" id="reklam1"><ins class="adsbygoogle"></ins></div>
+    <div class="reklam" id="reklam2"><amp-ad width="100" height="100" type="adsense"></amp-ad></div>
+    <div id="gizliReklam">
+        <iframe src="about:blank" name="ad-frame" class="ad-frame"></iframe>
+        <div class="ad-unit"></div>
+        <div class="advertisement"></div>
+    </div>
+    <div class="popup" id="popup1">
+        <h3>Bültenimize Abone Olun!</h3>
+        <input type="email" placeholder="E-posta">
+        <button class="kapat-btn">Kapat</button>
+    </div>
+    <div class="takip"><button id="konumBtn">Konum İzni Ver</button></div>
+    <div class="sosyal">
+        <iframe src="https://www.facebook.com/plugins/like.php" width="100" height="20"></iframe>
+        <iframe src="https://platform.twitter.com/widgets/follow_button.html" width="100" height="20"></iframe>
+        <iframe src="https://www.linkedin.com/embed/feed/update/" width="100" height="20"></iframe>
+    </div>
+<script>
+console.log(`%c\n█▀▄ ▄▀█ █░█░█ █▄░█\n█▄▀ █▀█ ▀▄▀▄▀ █░▀█ v3.0\n━━━━━━━━━━━━━━━━━━━━━━━━\n⚡ Hop! Nereye Gidiyorduk? 🤨\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n🛡️  Ultra Mega Süper Koruma Aktif!\n🚫  Geliştirici Araçları: Yok Öyle Yağma\n🔒  Güvenlik Seviyesi: Çok Fena\n🚀  Hız Seviyesi: Işık Hızında\n🎮  Mod: Beast Mode\n🌟  Özel Güç: Sınırsız\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n© ${new Date().getFullYear()} Dawn Security\nBu sitede çok havalı korumalar var! 😎\n━━━━━━━━━━━━━━━━━━━━━━━━`,'background:linear-gradient(90deg,#00d2ff 0%,#3a47d5 100%);color:#fff;font-family:monospace;font-size:14px;font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,.3);padding:20px;border-radius:10px;border:2px solid #0f0');console.log('%cDur! Dur! Dur! 🚔 Bu konsolu kullanamazsın!','color:#f00;font-family:"Comic Sans MS",cursive;font-size:40px;text-shadow:3px 3px 0 #000;background:linear-gradient(45deg,#f00,#ff7300);padding:20px;border-radius:10px;border:3px solid #f00');setTimeout(()=>{console.clear();console.log('%c'+['🕵️ Gizli görev başarısız!','🦹 Süper kötü adam modunu aktifleştirdin!','🎮 Game Over! Devam etmek için para at!','🌈 Konsol büyücüsü seni yakaladı!','🚀 Houston, bir sorunumuz var!','🎯 Hedef ıskalandı! Tekrar dene!','🎪 Sirk gösterisi bu tarafta değil!','🎭 Yanlış oyunu oynuyorsun dostum!'][Math.floor(8*Math.random())],'color:#f0f;font-family:"Comic Sans MS",cursive;font-size:30px;background:linear-gradient(45deg,#0f0,#0ff);padding:15px;border-radius:8px;border:2px dashed #f0f;text-shadow:2px 2px 4px rgba(0,0,0,.3)')},3e3);
+const G={devAraclarAcik:!1,init(){['log','warn','error','info','debug','trace'].forEach(e=>console[e]=Function.prototype),setInterval(()=>{const e=performance.now();debugger;performance.now()-e>100&&(location.href="about:blank")},1e3),document.addEventListener('keydown',e=>{[e.ctrlKey&&e.shiftKey&&73===e.keyCode,e.ctrlKey&&e.shiftKey&&74===e.keyCode,123===e.keyCode,e.ctrlKey&&85===e.keyCode,e.ctrlKey&&83===e.keyCode,e.ctrlKey&&80===e.keyCode].some(e=>e)&&(e.preventDefault(),!1)}),document.addEventListener('contextmenu',e=>e.preventDefault()),window.addEventListener('resize',()=>{(window.innerWidth<50||window.innerHeight<50)&&location.reload()});const e=new Image;Object.defineProperty(e,'id',{get:()=>{this.devAraclarAcik=!0,location.href="about:blank"}}),setInterval(()=>console.log('%c',e),100)}},R={engellendi:!1,init(){setInterval(()=>{[!!window.google_ad_status,!!window.google_ad_block,0===document.getElementById('gizliReklam').offsetHeight,void 0===window.canRunAds,document.createElement('div').setAttribute('class','adsbygoogle')].some(e=>e)&&(this.engellendi=!0,document.getElementById('adblockuyari').style.display='block',(['adsense','doubleclick','analytics'])[Math.floor(3*Math.random())]+'.com/ads.js')},500)}},A={init(){window.dataLayer=window.dataLayer||[],window.gtag=function(){dataLayer.push(arguments)},gtag('js',new Date),gtag('config','UA-XXXXX-Y')}},C={ayarla(e,t,n={}){document.cookie=`${e}=${t};max-age=${n.sure||31536e3};${n.guvenli?"Secure;":""}path=${n.yol||"/"};domain=${n.alan||location.hostname}`},depo:{kaydet(e,t){localStorage.setItem(e,btoa(JSON.stringify(t))),sessionStorage.setItem(`${e}_token`,btoa(Date.now()))}}},V={rastgeleDeger(e=8){return Math.random().toString(36).substring(2,e+2)},rastgeleTarih(){const e=new Date;return e.setDate(e.getDate()+Math.floor(365*Math.random())),e.toISOString()},init(){const e={"sid":this.rastgeleDeger(12),"uid":this.rastgeleDeger(16),"vid":Date.now(),"fp":btoa(navigator.userAgent+screen.width),"ref":document.referrer||"direct","tz":Intl.DateTimeFormat().resolvedOptions().timeZone,"lng":navigator.language,"ses":this.rastgeleDeger(20),"pv":"1","exp":this.rastgeleTarih()},t={kullanici_profil:{id:this.rastgeleDeger(10),son_ziyaret:Date.now(),ziyaret_sayisi:Math.floor(100*Math.random()),tarayici:navigator.userAgent,platform:navigator.platform},oturum_detay:{baslangic:Date.now(),sayfa_goruntuleme:1,aktif:!0,ip_hash:this.rastgeleDeger(16)},teknik_bilgi:{ekran:`${window.screen.width}x${window.screen.height}`,renk_derinligi:window.screen.colorDepth,piksel_orani:window.devicePixelRatio,bellek:navigator?.deviceMemory}};Object.entries(e).forEach(([e,t])=>{C.ayarla(e,t,{sure:86400*Math.floor(30*Math.random()),guvenli:!0,yol:"/",httpSade:!0})}),Object.entries(t).forEach(([e,t])=>{localStorage.setItem(`ls_${e}`,btoa(JSON.stringify(t))),sessionStorage.setItem(`ss_${e}`,btoa(JSON.stringify({...t,timestamp:Date.now()})))}),setInterval(()=>{C.ayarla("last_activity",Date.now()),sessionStorage.setItem("aktivite",Date.now())},1e3)}};document.addEventListener('DOMContentLoaded',()=>{G.init(),R.init(),A.init(),V.init(),document.querySelector('.kapat-btn').addEventListener('click',e=>e.target.closest('.popup').style.display='none'),setTimeout(()=>{document.getElementById('popup1').style.display='block',C.depo.kaydet('z',{t:new Date().toISOString(),b:btoa(navigator.userAgent),e:`${innerWidth}x${innerHeight}`,d:navigator.language})},3e3),document.getElementById('konumBtn').addEventListener('click',()=>{navigator.geolocation.getCurrentPosition(e=>{C.depo.kaydet('k',{t:new Date().toISOString(),d:'ok'})})})}),(function(){debugger;setInterval(()=>{debugger},100)})();
 </script>
 </body>
 </html>
